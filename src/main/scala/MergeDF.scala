@@ -1,4 +1,3 @@
-import Driver.generatePriority
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 object MergeDF extends App{
