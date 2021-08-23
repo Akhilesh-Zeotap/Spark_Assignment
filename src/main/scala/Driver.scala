@@ -3,10 +3,12 @@ import org.apache.spark.SparkConf
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import MergeDF.mergeDF
 import PriorityGenerator.generatePriority
+import org.apache.spark.sql.expressions.UserDefinedFunction
+import org.apache.spark.sql.functions.{col, udf}
 object Driver {
 
     /*
-    Return the count of the overlapping rows in 2 dataframes using "Identifier" column.
+    Returns the count of the overlapping rows in 2 dataframes using "Identifier" column.
      */
     def countOverlap(df1:DataFrame,df2:DataFrame):Long = {
         df1.join(df2,"Identifier").count()
@@ -24,7 +26,57 @@ object Driver {
         res(1)
     }
 
+    /*
+    Returns age count for a particular DP Id.
+    It will be same as count of DP Id in dataframe.
+     */
+    def dpAgeCount(df:DataFrame,DpId:Int): Any = {
+        getCount(df,DpId)
+    }
 
+    /*
+    Returns Gender count for a particular DP Id.
+    It will be same as count of DP Id in dataframe.
+     */
+    def dpGenderCount(df:DataFrame,DpId:Int):Any = {
+        getCount(df, DpId)
+    }
+
+    /*
+    Returns Zip Code count for a particular DP Id.
+    It will be same as count of DP Id in dataframe.
+     */
+    def dpZipCodeCount(df:DataFrame,DpId:Int):Any = {
+        getCount(df, DpId)
+    }
+
+    /*
+    Returns number of distinct Identifiers in Dataframe.
+    All Identifiers are unique in any Dataframe, so it will be count of rows in dataframe.
+     */
+    def identifierCount(df:DataFrame): Long = {
+        df.count()
+    }
+
+
+    def age_bucket: UserDefinedFunction = udf((age: Int) =>
+        if (age <= 18) 18
+        else if (age > 18 && age <= 25) 25
+        else if (age > 25 && age <= 35) 35
+        else if (age > 35 && age <= 45) 45
+        else if (age > 45 && age <= 55) 55
+        else if (age > 55 && age <= 65) 65
+        else 75
+    )
+
+
+    def ageCount(df:DataFrame): DataFrame = {
+        df.groupBy("Age").count()
+    }
+
+    def genderCount(df:DataFrame):DataFrame = {
+        df.groupBy("Gender").count()
+    }
 
 
     def main(args: Array[String]): Unit = {
@@ -43,9 +95,19 @@ object Driver {
         */
         val df_212 = df_212_1.union(df_212_2)
 
+        /*
+        generatePriority function is implemented in PriorityGenerator.scala File.
+         */
         val priority = generatePriority(List(4,212,316))
 
+        /*
+        mergeDF function is implemented in MergeDF.scala File.
+         */
         val mergedDF = mergeDF(df_4, df_212, df_316, priority)
-        mergedDF.groupBy("DpId").count().show()
+
+        /*
+        Apply age_bucket udf to convert Age column of merged dataframe.
+         */
+        val finalDF = mergedDF.withColumn("Age",age_bucket(col("Age")))
     }
 }
