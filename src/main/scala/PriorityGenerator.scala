@@ -1,7 +1,7 @@
 import scala.util.Random
 
 object PriorityGenerator {
-  def generatePriority(dp:List[Int]): List[Int] = {
+  def generatePriority(dp: List[Int]): List[Int] = {
     /*
     First generate permutations of all dpId's.
     returns random permutation of Dp's, where priority will be in order:

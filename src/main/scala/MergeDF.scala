@@ -1,6 +1,6 @@
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.DataFrame
 
-object MergeDF extends App{
+object MergeDF extends App {
 
   def mergeDF(df_4: DataFrame, df_212: DataFrame, df_316: DataFrame, priority: List[Int]): DataFrame = {
     priority.head match {
